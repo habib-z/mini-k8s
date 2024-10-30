@@ -1,0 +1,13 @@
+
+Pushing directly to the in-cluster Docker daemon (docker-env)
+PowerShell:
+
+& minikube -p minikube docker-env --shell powershell | Invoke-Expression
+
+cmd:
+
+@FOR /f "tokens=*" %i IN ('minikube -p minikube docker-env --shell cmd') DO @%i
+
+-------------------------
+port forward:
+kubectl port-forward frontend-6ff7bb7f8f-2ftj4 80:8888

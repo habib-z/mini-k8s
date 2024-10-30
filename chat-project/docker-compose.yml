@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  client:
+    stdin_open: true
+    build: ./react-chat-server
+    ports:
+      - 8888:8888
+  nginx:
+    depends_on:
+      - client
+      - api
+    restart: always
+    build: 
+      dockerfile: Dockerfile.dev
+      context: './nginx'
+    ports:
+      - 3050:80
+  api:
+    build: 
+      dockerfile: Dockerfile
+      context: './chat_server'
+    ports:
+      - 8000:8000
+    depends_on:
+      - database
+
+  database:
+    image: redis:7.2.3-alpine
+    volumes:
+      - chat_db:/data
+    ports:
+      - 6379:6379
+
+volumes:
+  chat_db:

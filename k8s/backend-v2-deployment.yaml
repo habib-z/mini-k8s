@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-v2
+  template:
+    metadata:
+      labels:
+        app: backend-v2
+    spec:
+      containers:
+      - name: backend-v2
+        image: your_docker_registry/backend_v2_image
+        env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: api-key
+        - name: STORAGE_PATH
+          value: "/data/storage.txt"
+        volumeMounts:
+        - mountPath: "/data"
+          name: data-volume
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: data-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v2-service
+spec:
+  selector:
+    app: backend-v2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+type: Opaque
+data:
+  api-key: <your_base64_encoded_api_key>

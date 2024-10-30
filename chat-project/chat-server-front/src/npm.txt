@@ -1,0 +1,15 @@
+rafce es7+ extension
+bootstap npm i bootstap@latest
+npm i zod@latest
+
+npm i react-hook-form
+
+integrate react-hook-form with zod:
+    npm i @hookform/resolvers
+
+fetching data (request to backend):
+    npm i axios@latest
+
+google login:
+    npm install react-google-login // depricated
+    npm install @react-oauth/google@latest

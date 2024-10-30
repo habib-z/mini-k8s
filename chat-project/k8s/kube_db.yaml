@@ -1,0 +1,91 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+type: Opaque
+data:
+  redis_username: cm9vdA==
+  redis_password: cm9vdA==
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  labels:
+    app: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - image: redis:7.2.3-alpine
+          imagePullPolicy: IfNotPresent
+          name: database
+          ports:
+            - containerPort: 6379
+              hostPort: 6379
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "0.1"
+              ephemeral-storage: 1G
+              memory: 200M
+            requests:
+              cpu: "0.1"
+              ephemeral-storage: 1G
+              memory: 200M
+          env:
+            - name: ENV_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis_username
+            - name: ENV_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis_password
+          volumeMounts:
+            - mountPath: /data
+              name: chat-db
+      restartPolicy: Always
+      volumes:
+        - name: chat-db
+          persistentVolumeClaim:
+            claimName: chat-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: chat-db
+  name: chat-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+  labels:
+    app: database
+spec:
+  selector:
+    app: database
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
