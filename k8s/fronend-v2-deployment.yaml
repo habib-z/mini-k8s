@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-v2
+  template:
+    metadata:
+      labels:
+        app: frontend-v2
+    spec:
+      containers:
+      - name: frontend-v2
+        image: your_docker_registry/frontend_v2_image
+        env:
+        - name: BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: backend-url
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  backend-url: "http://backend-v2-service:80"
